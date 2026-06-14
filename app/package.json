@@ -1,0 +1,13 @@
+{
+  "name": "dmz-domain-manager",
+  "version": "1.0.0",
+  "description": "DMZ 망 도메인 관리 사이트 - backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0"
+  }
+}

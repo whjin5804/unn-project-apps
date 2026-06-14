@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DMZ 도메인 관리 시스템</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">DMZ 도메인 관리 시스템</div>
+    <div class="header-right">
+      <span class="user-name">로그인 사용자 · <strong id="current-user">-</strong></span>
+      <button class="btn btn-light btn-sm" id="btn-change-pw">비밀번호 변경</button>
+      <button class="btn btn-light btn-sm" id="btn-logout">로그아웃</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 통계 카드 -->
+    <section class="stats" id="stats">
+      <div class="stat-card accent">
+        <div class="stat-label">전체 도메인</div>
+        <div class="stat-value" id="stat-total">-</div>
+        <div class="stat-sub">등록된 도메인 수</div>
+      </div>
+      <div class="stat-card hanwha-stat">
+        <div class="stat-label">한화시스템/ICT 운영</div>
+        <div class="stat-value" id="stat-hanwha">-</div>
+        <div class="stat-sub">한화 운영 도메인 수</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">웹방화벽</div>
+        <div class="stat-value" id="stat-webFirewall">-</div>
+        <div class="stat-sub" id="stat-webFirewall-sub">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">웹 SSL</div>
+        <div class="stat-value" id="stat-webSSL">-</div>
+        <div class="stat-sub" id="stat-webSSL-sub">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">취약점진단</div>
+        <div class="stat-value" id="stat-vulnScan">-</div>
+        <div class="stat-sub" id="stat-vulnScan-sub">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">DNS 결재</div>
+        <div class="stat-value" id="stat-dnsApproval">-</div>
+        <div class="stat-sub" id="stat-dnsApproval-sub">-</div>
+      </div>
+    </section>
+
+    <!-- 툴바 -->
+    <section class="toolbar">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="도메인명 검색..." />
+      </div>
+      <div class="filter-group">
+        <label class="checkbox-inline">
+          <input type="checkbox" id="filter-hanwha" />
+          한화시스템/ICT 운영만
+        </label>
+        <label class="checkbox-inline">
+          <input type="checkbox" id="filter-pending" />
+          미완료 항목 있는 도메인만
+        </label>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" id="btn-add">+ 도메인 추가</button>
+    </section>
+
+    <!-- 안내 영역 (로딩/에러) -->
+    <div id="notice" class="notice" style="display:none;"></div>
+
+    <!-- 테이블 -->
+    <section class="table-wrap">
+      <table class="domain-table">
+        <thead>
+          <tr>
+            <th>도메인명</th>
+            <th>IP 주소</th>
+            <th>운영주체</th>
+            <th>운영여부</th>
+            <th>웹방화벽</th>
+            <th>웹SSL</th>
+            <th>취약점진단</th>
+            <th>DNS결재</th>
+            <th>비고</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody id="domain-tbody">
+          <tr class="empty-row"><td colspan="10">불러오는 중...</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- 도메인 추가/수정 모달 -->
+  <div class="modal-overlay" id="domain-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="domain-modal-title">도메인 추가</h2>
+        <button class="modal-close" data-close="domain-modal" type="button">&times;</button>
+      </div>
+      <form id="domain-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field-error" id="domain-form-error"></div>
+
+            <div class="full">
+              <label class="field"><span style="font-weight:600;font-size:13px;">도메인명 <span style="color:var(--no)">*</span></span></label>
+              <input type="text" id="f-name" placeholder="예: portal.example.com" />
+            </div>
+            <div>
+              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">IP 주소</label>
+              <input type="text" id="f-ip" placeholder="예: 10.0.0.10" />
+            </div>
+            <div>
+              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">운영주체/부서</label>
+              <input type="text" id="f-owner" placeholder="예: 정보보안팀" />
+            </div>
+
+            <div class="checks">
+              <label class="checkbox-inline">
+                <input type="checkbox" id="f-isHanwha" /> 한화시스템/ICT 운영 도메인
+              </label>
+              <span></span>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="f-webFirewall" /> 웹방화벽 적용
+              </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="f-webSSL" /> 웹 SSL 적용
+              </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="f-vulnScan" /> 취약점진단 완료
+              </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="f-dnsApproval" /> DNS 결재 완료
+              </label>
+            </div>
+
+            <div class="full">
+              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">비고</label>
+              <textarea id="f-description" placeholder="비고를 입력하세요"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" data-close="domain-modal">취소</button>
+          <button type="submit" class="btn btn-primary" id="domain-save-btn">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 비밀번호 변경 모달 -->
+  <div class="modal-overlay" id="pw-modal">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-header">
+        <h2>비밀번호 변경</h2>
+        <button class="modal-close" data-close="pw-modal" type="button">&times;</button>
+      </div>
+      <form id="pw-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field-error" id="pw-form-error"></div>
+            <div class="full">
+              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">현재 비밀번호</label>
+              <input type="password" id="f-currentPassword" autocomplete="current-password" />
+            </div>
+            <div class="full">
+              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">새 비밀번호</label>
+              <input type="password" id="f-newPassword" autocomplete="new-password" />
+            </div>
+            <div class="full">
+              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">새 비밀번호 확인</label>
+              <input type="password" id="f-newPassword2" autocomplete="new-password" />
+            </div>
+            <div class="msg" id="pw-success" style="grid-column:1/-1;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" data-close="pw-modal">취소</button>
+          <button type="submit" class="btn btn-primary" id="pw-save-btn">변경</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
