@@ -21,3 +21,17 @@ spec:
       - name: oprnginx
         image: ec2-43-201-64-230.ap-northeast-2.compute.amazonaws.com/unn-project/web04:latest
         imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /login.html
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /login.html
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
