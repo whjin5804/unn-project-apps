@@ -504,3 +504,197 @@ table.domain-table {
   .app-header .brand { font-size: 15px; }
   .container { padding: 16px; }
 }
+
+/* ============================================================
+   추가 편의 기능 스타일
+   ============================================================ */
+
+.app-header .header-right { flex-wrap: wrap; }
+.btn-light-2 { background: #eef1f7; color: var(--text); border-color: var(--border); }
+.btn-light-2:hover { background: #e3e7f0; opacity: 1; }
+
+/* 셀렉트 박스 */
+.select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+.select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(47,111,237,0.15); }
+.select-sm { padding: 4px 8px; font-size: 12px; }
+
+/* 통계 카드 미니 바 */
+.bar {
+  height: 6px;
+  background: var(--gray-bg);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 8px 0 2px;
+}
+.bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent), #4d86f5);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* 결과 바 / 일괄 작업 */
+.result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.result-count { font-size: 13px; color: var(--text-muted); }
+.bulk-actions { display: flex; align-items: center; gap: 8px; }
+.bulk-count { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+/* 체크박스 열 / 선택된 행 */
+.col-check { width: 36px; text-align: center; }
+.col-check input { width: 16px; height: 16px; cursor: pointer; }
+.domain-table tbody tr.row-selected { background: #eef4ff; }
+
+/* 정렬 가능한 헤더 */
+th.sortable { cursor: pointer; user-select: none; position: relative; }
+th.sortable:hover { color: var(--accent); }
+th.sortable::after { content: '⇅'; opacity: 0.3; margin-left: 4px; font-size: 10px; }
+th.sortable.sort-asc::after { content: '▲'; opacity: 1; color: var(--accent); }
+th.sortable.sort-desc::after { content: '▼'; opacity: 1; color: var(--accent); }
+
+/* 보안 완료 점수 배지 */
+.score-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.score-badge.ok { background: var(--ok-bg); color: var(--ok); }
+.score-badge.warn { background: #fdf3e0; color: #c87f0a; }
+.score-badge.no { background: var(--no-bg); color: var(--no); }
+.badge.warn { background: #fdf3e0; color: #c87f0a; }
+
+/* 페이지네이션 */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.pager-right { display: flex; align-items: center; gap: 8px; }
+.page-info { min-width: 110px; text-align: center; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* 폼 라벨 공통 */
+.lbl { font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px; }
+.req { color: var(--no); }
+
+/* 상세 모달 */
+.detail-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label { color: var(--text-muted); font-weight: 600; }
+.detail-value { word-break: break-all; }
+
+/* CSV 가져오기 */
+.help { font-size: 12px; color: var(--text-muted); line-height: 1.7; margin: 0 0 14px; }
+.help code { background: var(--gray-bg); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+.import-preview { margin-top: 12px; }
+.import-ok { color: var(--ok); font-size: 13px; font-weight: 600; }
+.import-list { margin: 8px 0 0; padding-left: 18px; font-size: 13px; }
+.import-list .muted { color: var(--text-muted); font-size: 12px; }
+#import-file { font-size: 13px; }
+
+/* 활동 로그 테이블 */
+.modal-wide { max-width: 760px; }
+.log-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.log-table th {
+  background: #f7f9fd; color: var(--text-muted); text-align: left;
+  padding: 9px 10px; border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.log-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.log-table tbody tr:hover { background: #f9fbff; }
+
+/* 토스트 */
+.toast-container {
+  position: fixed;
+  top: 76px;
+  right: 20px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  min-width: 220px;
+  max-width: 360px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.toast.show { opacity: 1; transform: translateX(0); }
+.toast.success { background: #1f9d55; }
+.toast.error { background: #c8323c; }
+.toast.info { background: #2f6fed; }
+
+/* ============================================================
+   다크 모드
+   ============================================================ */
+body.dark {
+  --header-bg: #0e1626;
+  --header-bg-2: #16203a;
+  --bg: #0f1523;
+  --surface: #182032;
+  --border: #2a3550;
+  --text: #e6eaf2;
+  --text-muted: #9aa6bf;
+  --gray-bg: #232e45;
+  --ok-bg: #133527;
+  --no-bg: #3a1c20;
+  --hanwha-bg: #3a2410;
+  --external-bg: #232b3d;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+body.dark .domain-table thead th,
+body.dark .log-table th { background: #1c2536; }
+body.dark .domain-table tbody tr:hover,
+body.dark .log-table tbody tr:hover { background: #1f2940; }
+body.dark .domain-table tbody tr.row-selected { background: #1e2c4a; }
+body.dark .btn { background: #232e45; color: var(--text); }
+body.dark .btn-light-2 { background: #232e45; color: var(--text); }
+body.dark .btn-primary { background: var(--accent); color: #fff; }
+body.dark .btn-danger { background: var(--no); color: #fff; }
+body.dark .help code,
+body.dark .checks { background: #1c2536; }
+body.dark .score-badge.warn, body.dark .badge.warn { background: #3a2c12; color: #e0a23c; }
+
+@media (max-width: 980px) {
+  .toolbar { flex-wrap: wrap; }
+  .pager { justify-content: center; }
+}

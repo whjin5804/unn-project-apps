@@ -29,7 +29,7 @@ function resolveDataFile() {
 const DATA_FILE = resolveDataFile();
 
 function defaultData() {
-  return { users: [], domains: [] };
+  return { users: [], domains: [], logs: [] };
 }
 
 function readData() {
@@ -39,6 +39,7 @@ function readData() {
     if (!parsed || typeof parsed !== 'object') return defaultData();
     if (!Array.isArray(parsed.users)) parsed.users = [];
     if (!Array.isArray(parsed.domains)) parsed.domains = [];
+    if (!Array.isArray(parsed.logs)) parsed.logs = [];
     return parsed;
   } catch (err) {
     return defaultData();
@@ -52,6 +53,42 @@ function writeData(data) {
 
 function genId() {
   return crypto.randomBytes(8).toString('hex');
+}
+
+// ---- Audit log helpers ----
+
+const MAX_LOGS = 500;
+
+// Append an audit log entry and persist. Caps the log at the most recent
+// MAX_LOGS entries (oldest trimmed).
+function addLog(user, action, detail) {
+  const data = readData();
+  appendLog(data, user, action, detail);
+  writeData(data);
+}
+
+// Append a log entry to an in-memory data object (caller persists).
+function appendLog(data, user, action, detail) {
+  if (!Array.isArray(data.logs)) data.logs = [];
+  data.logs.push({
+    id: genId(),
+    time: new Date().toISOString(),
+    user: typeof user === 'string' ? user : '',
+    action: action,
+    detail: typeof detail === 'string' ? detail : ''
+  });
+  if (data.logs.length > MAX_LOGS) {
+    data.logs.splice(0, data.logs.length - MAX_LOGS);
+  }
+  return data;
+}
+
+// Return the most recent `limit` logs, newest first.
+function listLogs(limit) {
+  const n = typeof limit === 'number' && limit > 0 ? Math.floor(limit) : 100;
+  const logs = readData().logs.slice();
+  logs.reverse();
+  return logs.slice(0, n);
 }
 
 function seedDomains() {
@@ -156,6 +193,7 @@ function changePassword(username, currentPassword, newPassword) {
     return { ok: false, error: '새 비밀번호를 입력하세요.' };
   }
   user.password = newPassword;
+  appendLog(data, username, 'auth.password', '비밀번호 변경');
   writeData(data);
   return { ok: true };
 }
@@ -182,7 +220,7 @@ function listDomains() {
   return readData().domains;
 }
 
-function createDomain(body) {
+function createDomain(body, actor) {
   const fields = normalizeDomainInput(body);
   if (!fields.name) {
     return { ok: false, error: '도메인명(name)은 필수입니다.' };
@@ -191,11 +229,12 @@ function createDomain(body) {
   const domain = { id: genId(), ...fields, createdAt: now, updatedAt: now };
   const data = readData();
   data.domains.push(domain);
+  appendLog(data, actor, 'domain.create', domain.name);
   writeData(data);
   return { ok: true, domain };
 }
 
-function updateDomain(id, body) {
+function updateDomain(id, body, actor) {
   const data = readData();
   const idx = data.domains.findIndex((d) => d.id === id);
   if (idx === -1) return { ok: false, notFound: true };
@@ -213,17 +252,44 @@ function updateDomain(id, body) {
     updatedAt: new Date().toISOString()
   };
   data.domains[idx] = updated;
+  appendLog(data, actor, 'domain.update', updated.name);
   writeData(data);
   return { ok: true, domain: updated };
 }
 
-function deleteDomain(id) {
+function deleteDomain(id, actor) {
   const data = readData();
   const idx = data.domains.findIndex((d) => d.id === id);
   if (idx === -1) return { ok: false, notFound: true };
+  const removed = data.domains[idx];
   data.domains.splice(idx, 1);
+  appendLog(data, actor, 'domain.delete', removed.name);
   writeData(data);
   return { ok: true };
+}
+
+// Validate and create many domains in one pass, persisting once at the end.
+function createDomainsBulk(arrayOfBodies, actor) {
+  const rows = Array.isArray(arrayOfBodies) ? arrayOfBodies : [];
+  const data = readData();
+  const now = new Date().toISOString();
+  let created = 0;
+  const errors = [];
+
+  rows.forEach((body, i) => {
+    const fields = normalizeDomainInput(body);
+    if (!fields.name) {
+      errors.push({ row: i, name: fields.name, error: '도메인명(name)은 필수입니다.' });
+      return;
+    }
+    const domain = { id: genId(), ...fields, createdAt: now, updatedAt: now };
+    data.domains.push(domain);
+    created += 1;
+  });
+
+  appendLog(data, actor, 'domain.bulk', created + '건 등록');
+  writeData(data);
+  return { ok: true, created: created, failed: errors.length, errors: errors };
 }
 
 module.exports = {
@@ -234,5 +300,8 @@ module.exports = {
   listDomains,
   createDomain,
   updateDomain,
-  deleteDomain
+  deleteDomain,
+  createDomainsBulk,
+  addLog,
+  listLogs
 };

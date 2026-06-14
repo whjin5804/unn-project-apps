@@ -8,8 +8,10 @@
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">DMZ 도메인 관리 시스템</div>
+    <div class="brand">🛡️ DMZ 도메인 관리 시스템</div>
     <div class="header-right">
+      <button class="btn btn-light btn-sm" id="btn-theme" title="화면 테마 전환 (라이트/다크)">🌙 다크</button>
+      <button class="btn btn-light btn-sm" id="btn-logs" title="활동 로그 보기">📜 활동 로그</button>
       <span class="user-name">👤 <strong id="current-user">-</strong></span>
       <button class="btn btn-light btn-sm" id="btn-change-pw">비밀번호 변경</button>
       <button class="btn btn-light btn-sm" id="btn-logout">로그아웃</button>
@@ -27,26 +29,30 @@
       <div class="stat-card hanwha-stat">
         <div class="stat-label">한화 운영 도메인</div>
         <div class="stat-value" id="stat-hanwha">-</div>
-        <div class="stat-sub">한화 운영</div>
+        <div class="stat-sub" id="stat-hanwha-sub">한화 운영</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">웹방화벽</div>
         <div class="stat-value" id="stat-webFirewall">-</div>
+        <div class="bar"><span id="bar-webFirewall"></span></div>
         <div class="stat-sub" id="stat-webFirewall-sub">-</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">웹 SSL</div>
         <div class="stat-value" id="stat-webSSL">-</div>
+        <div class="bar"><span id="bar-webSSL"></span></div>
         <div class="stat-sub" id="stat-webSSL-sub">-</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">취약점진단</div>
         <div class="stat-value" id="stat-vulnScan">-</div>
+        <div class="bar"><span id="bar-vulnScan"></span></div>
         <div class="stat-sub" id="stat-vulnScan-sub">-</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">DNS 결재</div>
         <div class="stat-value" id="stat-dnsApproval">-</div>
+        <div class="bar"><span id="bar-dnsApproval"></span></div>
         <div class="stat-sub" id="stat-dnsApproval-sub">-</div>
       </div>
     </section>
@@ -54,21 +60,38 @@
     <!-- 툴바 -->
     <section class="toolbar">
       <div class="search-box">
-        <input type="text" id="search-input" placeholder="도메인명 검색..." />
+        <input type="text" id="search-input" placeholder="🔍 도메인명 · IP · 운영주체 검색  (단축키 /)" />
       </div>
-      <div class="filter-group">
-        <label class="checkbox-inline">
-          <input type="checkbox" id="filter-hanwha" />
-          한화 운영만
-        </label>
-        <label class="checkbox-inline">
-          <input type="checkbox" id="filter-pending" />
-          미완료 있는 도메인만
-        </label>
-      </div>
+      <select id="filter-affiliate" class="select" title="계열사 필터">
+        <option value="">계열사 전체</option>
+      </select>
+      <select id="filter-operation" class="select" title="운영구분 필터">
+        <option value="">운영구분 전체</option>
+        <option value="hanwha">한화시스템/ICT</option>
+        <option value="external">외부</option>
+      </select>
+      <select id="filter-security" class="select" title="보안상태 필터">
+        <option value="">보안상태 전체</option>
+        <option value="complete">완료 (4/4)</option>
+        <option value="pending">미완료 (미흡)</option>
+      </select>
+      <button class="btn btn-light-2 btn-sm" id="btn-reset-filter" title="필터 초기화">↺ 초기화</button>
       <div class="spacer"></div>
-      <button class="btn btn-primary" id="btn-add">+ 도메인 추가</button>
+      <button class="btn btn-sm" id="btn-refresh" title="새로고침 (단축키 r)">⟳ 새로고침</button>
+      <button class="btn btn-sm" id="btn-export" title="현재 목록 CSV 내보내기">⬇ CSV 내보내기</button>
+      <button class="btn btn-sm" id="btn-import" title="CSV 일괄 등록">⬆ CSV 가져오기</button>
+      <button class="btn btn-primary" id="btn-add" title="도메인 추가 (단축키 n)">+ 도메인 추가</button>
     </section>
+
+    <!-- 결과 요약 / 일괄 작업 바 -->
+    <div class="result-bar">
+      <span id="result-count" class="result-count">-</span>
+      <div class="bulk-actions" id="bulk-actions" style="display:none;">
+        <span id="bulk-count" class="bulk-count">0건 선택</span>
+        <button class="btn btn-sm btn-danger" id="btn-bulk-delete">선택 삭제</button>
+        <button class="btn btn-sm" id="btn-bulk-clear">선택 해제</button>
+      </div>
+    </div>
 
     <!-- 안내 영역 (로딩/에러) -->
     <div id="notice" class="notice" style="display:none;"></div>
@@ -78,24 +101,46 @@
       <table class="domain-table">
         <thead>
           <tr>
-            <th>도메인명</th>
-            <th>IP 주소</th>
-            <th>계열사</th>
-            <th>운영주체</th>
-            <th>운영여부</th>
-            <th>웹방화벽</th>
-            <th>웹SSL</th>
-            <th>취약점진단</th>
-            <th>DNS결재</th>
+            <th class="col-check"><input type="checkbox" id="check-all" title="현재 페이지 전체 선택" /></th>
+            <th class="sortable" data-sort="name">도메인명</th>
+            <th class="sortable" data-sort="ip">IP 주소</th>
+            <th class="sortable" data-sort="affiliate">계열사</th>
+            <th class="sortable" data-sort="owner">운영주체</th>
+            <th class="sortable" data-sort="isHanwha">운영여부</th>
+            <th class="sortable" data-sort="webFirewall">웹방화벽</th>
+            <th class="sortable" data-sort="webSSL">웹SSL</th>
+            <th class="sortable" data-sort="vulnScan">취약점진단</th>
+            <th class="sortable" data-sort="dnsApproval">DNS결재</th>
+            <th class="sortable" data-sort="score">보안완료</th>
             <th>비고</th>
             <th>관리</th>
           </tr>
         </thead>
         <tbody id="domain-tbody">
-          <tr class="empty-row"><td colspan="11">불러오는 중...</td></tr>
+          <tr class="empty-row"><td colspan="13">불러오는 중...</td></tr>
         </tbody>
       </table>
     </section>
+
+    <!-- 페이지네이션 -->
+    <div class="pager" id="pager">
+      <div class="pager-left">
+        페이지당
+        <select id="page-size" class="select select-sm">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="0">전체</option>
+        </select>
+        건
+      </div>
+      <div class="pager-right">
+        <button class="btn btn-sm" id="page-prev">‹ 이전</button>
+        <span id="page-info" class="page-info">-</span>
+        <button class="btn btn-sm" id="page-next">다음 ›</button>
+      </div>
+    </div>
   </main>
 
   <!-- 도메인 추가/수정 모달 -->
@@ -111,22 +156,24 @@
             <div class="field-error" id="domain-form-error"></div>
 
             <div class="full">
-              <label class="field"><span style="font-weight:600;font-size:13px;">도메인명 <span style="color:var(--no)">*</span></span></label>
+              <label class="lbl">도메인명 <span class="req">*</span></label>
               <input type="text" id="f-name" placeholder="예: portal.example.com" />
             </div>
             <div>
-              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">IP 주소</label>
+              <label class="lbl">IP 주소</label>
               <input type="text" id="f-ip" placeholder="예: 10.0.0.10" />
             </div>
             <div>
-              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">계열사</label>
-              <input type="text" id="f-affiliate" placeholder="예: 한화시스템" />
+              <label class="lbl">계열사</label>
+              <input type="text" id="f-affiliate" list="affiliate-list" placeholder="예: 한화시스템" />
+              <datalist id="affiliate-list"></datalist>
             </div>
             <div class="full">
-              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">운영주체/부서</label>
+              <label class="lbl">운영주체/부서</label>
               <input type="text" id="f-owner" placeholder="예: 정보보안팀" />
             </div>
 
+            <div class="section-label">보안 점검 / 결재 상태</div>
             <div class="checks">
               <label class="checkbox-inline">
                 <input type="checkbox" id="f-isHanwha" /> 한화시스템/ICT 운영 도메인
@@ -147,7 +194,7 @@
             </div>
 
             <div class="full">
-              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">비고</label>
+              <label class="lbl">비고</label>
               <textarea id="f-description" placeholder="비고를 입력하세요"></textarea>
             </div>
           </div>
@@ -157,6 +204,71 @@
           <button type="submit" class="btn btn-primary" id="domain-save-btn">저장</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- 도메인 상세 모달 -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>도메인 상세 정보</h2>
+        <button class="modal-close" data-close="detail-modal" type="button">&times;</button>
+      </div>
+      <div class="modal-body" id="detail-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="detail-modal">닫기</button>
+        <button type="button" class="btn btn-primary" id="detail-edit-btn">수정</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSV 가져오기 모달 -->
+  <div class="modal-overlay" id="import-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>CSV 일괄 가져오기</h2>
+        <button class="modal-close" data-close="import-modal" type="button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="help">
+          CSV 파일로 도메인을 한 번에 등록합니다. 첫 행은 헤더이며, 아래 열 이름을 사용하세요.<br />
+          <code>도메인명, IP주소, 계열사, 운영주체, 한화운영, 웹방화벽, 웹SSL, 취약점진단, DNS결재, 비고</code><br />
+          체크 항목(한화운영/웹방화벽/웹SSL/취약점진단/DNS결재)은 <strong>O</strong> 또는 <strong>X</strong>(또는 true/false, Y/N)로 입력합니다.
+          현재 화면의 "CSV 내보내기"로 받은 파일을 그대로 다시 가져올 수 있습니다.
+        </p>
+        <input type="file" id="import-file" accept=".csv,text/csv" />
+        <div id="import-preview" class="import-preview"></div>
+        <div class="field-error" id="import-error"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="import-modal">취소</button>
+        <button type="button" class="btn btn-primary" id="import-confirm-btn" disabled>가져오기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 활동 로그 모달 -->
+  <div class="modal-overlay" id="logs-modal">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h2>활동 로그</h2>
+        <button class="modal-close" data-close="logs-modal" type="button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-wrap">
+          <table class="log-table">
+            <thead>
+              <tr><th>일시</th><th>사용자</th><th>활동</th><th>대상</th></tr>
+            </thead>
+            <tbody id="logs-tbody">
+              <tr class="empty-row"><td colspan="4">불러오는 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-close="logs-modal">닫기</button>
+      </div>
     </div>
   </div>
 
@@ -172,15 +284,15 @@
           <div class="form-grid">
             <div class="field-error" id="pw-form-error"></div>
             <div class="full">
-              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">현재 비밀번호</label>
+              <label class="lbl">현재 비밀번호</label>
               <input type="password" id="f-currentPassword" autocomplete="current-password" />
             </div>
             <div class="full">
-              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">새 비밀번호</label>
+              <label class="lbl">새 비밀번호</label>
               <input type="password" id="f-newPassword" autocomplete="new-password" />
             </div>
             <div class="full">
-              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">새 비밀번호 확인</label>
+              <label class="lbl">새 비밀번호 확인</label>
               <input type="password" id="f-newPassword2" autocomplete="new-password" />
             </div>
             <div class="msg" id="pw-success" style="grid-column:1/-1;"></div>
@@ -193,6 +305,9 @@
       </form>
     </div>
   </div>
+
+  <!-- 토스트 알림 -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="/js/app.js"></script>
 </body>
