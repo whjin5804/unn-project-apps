@@ -80,6 +80,7 @@
           <tr>
             <th>도메인명</th>
             <th>IP 주소</th>
+            <th>계열사</th>
             <th>운영주체</th>
             <th>운영여부</th>
             <th>웹방화벽</th>
@@ -91,7 +92,7 @@
           </tr>
         </thead>
         <tbody id="domain-tbody">
-          <tr class="empty-row"><td colspan="10">불러오는 중...</td></tr>
+          <tr class="empty-row"><td colspan="11">불러오는 중...</td></tr>
         </tbody>
       </table>
     </section>
@@ -118,6 +119,10 @@
               <input type="text" id="f-ip" placeholder="예: 10.0.0.10" />
             </div>
             <div>
+              <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">계열사</label>
+              <input type="text" id="f-affiliate" placeholder="예: 한화시스템" />
+            </div>
+            <div class="full">
               <label style="font-weight:600;font-size:13px;display:block;margin-bottom:6px;">운영주체/부서</label>
               <input type="text" id="f-owner" placeholder="예: 정보보안팀" />
             </div>

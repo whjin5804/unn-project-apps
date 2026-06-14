@@ -26,6 +26,7 @@
 
   var fName = $('f-name');
   var fIp = $('f-ip');
+  var fAffiliate = $('f-affiliate');
   var fOwner = $('f-owner');
   var fIsHanwha = $('f-isHanwha');
   var fWebFirewall = $('f-webFirewall');
@@ -177,16 +178,16 @@
   // ===== 배지 렌더 =====
   function boolBadge(val) {
     if (val) {
-      return '<span class="badge ok">✅ 적용</span>';
+      return '<span class="badge ok">O</span>';
     }
-    return '<span class="badge no">❌ 미적용</span>';
+    return '<span class="badge no">X</span>';
   }
 
   function hanwhaBadge(val) {
     if (val) {
-      return '<span class="badge hanwha">한화시스템/ICT</span>';
+      return '<span class="badge hanwha">O</span>';
     }
-    return '<span class="badge external">외부</span>';
+    return '<span class="badge external">X</span>';
   }
 
   // ===== 테이블 렌더 =====
@@ -199,6 +200,7 @@
       empty.className = 'empty-row';
       var td = document.createElement('td');
       td.colSpan = 10;
+      td.colSpan = 11;
       td.textContent = domains.length === 0
         ? '등록된 도메인이 없습니다. "+ 도메인 추가" 버튼으로 등록하세요.'
         : '검색/필터 조건에 맞는 도메인이 없습니다.';
@@ -212,6 +214,7 @@
       tr.innerHTML =
         '<td class="col-name">' + escapeHtml(d.name) + '</td>' +
         '<td>' + escapeHtml(d.ip) + '</td>' +
+        '<td>' + escapeHtml(d.affiliate || '') + '</td>' +
         '<td>' + escapeHtml(d.owner) + '</td>' +
         '<td>' + hanwhaBadge(d.isHanwha) + '</td>' +
         '<td>' + boolBadge(d.webFirewall) + '</td>' +
@@ -249,6 +252,7 @@
       domainModalTitle.textContent = '도메인 수정';
       fName.value = domain.name || '';
       fIp.value = domain.ip || '';
+      fAffiliate.value = domain.affiliate || '';
       fOwner.value = domain.owner || '';
       fIsHanwha.checked = !!domain.isHanwha;
       fWebFirewall.checked = !!domain.webFirewall;
@@ -279,6 +283,7 @@
     var payload = {
       name: name,
       ip: fIp.value.trim(),
+      affiliate: fAffiliate.value.trim(),
       owner: fOwner.value.trim(),
       isHanwha: fIsHanwha.checked,
       webFirewall: fWebFirewall.checked,
