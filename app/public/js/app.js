@@ -149,7 +149,7 @@
         valEl.innerHTML = '<span class="pct">' + pct + '%</span>';
       }
       if (subEl) {
-        subEl.innerHTML = '완료 ' + done + '건 · <span style="color:var(--no);font-weight:700;">미완료 ' + pending + '건</span>';
+        subEl.innerHTML = '✓ ' + done + '건 &nbsp;✗ ' + pending + '건';
       }
     });
   }

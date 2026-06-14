@@ -10,7 +10,7 @@
   <header class="app-header">
     <div class="brand">DMZ 도메인 관리 시스템</div>
     <div class="header-right">
-      <span class="user-name">로그인 사용자 · <strong id="current-user">-</strong></span>
+      <span class="user-name">👤 <strong id="current-user">-</strong></span>
       <button class="btn btn-light btn-sm" id="btn-change-pw">비밀번호 변경</button>
       <button class="btn btn-light btn-sm" id="btn-logout">로그아웃</button>
     </div>
@@ -22,12 +22,12 @@
       <div class="stat-card accent">
         <div class="stat-label">전체 도메인</div>
         <div class="stat-value" id="stat-total">-</div>
-        <div class="stat-sub">등록된 도메인 수</div>
+        <div class="stat-sub">등록 도메인</div>
       </div>
       <div class="stat-card hanwha-stat">
-        <div class="stat-label">한화시스템/ICT 운영</div>
+        <div class="stat-label">한화 운영 도메인</div>
         <div class="stat-value" id="stat-hanwha">-</div>
-        <div class="stat-sub">한화 운영 도메인 수</div>
+        <div class="stat-sub">한화 운영</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">웹방화벽</div>
@@ -59,11 +59,11 @@
       <div class="filter-group">
         <label class="checkbox-inline">
           <input type="checkbox" id="filter-hanwha" />
-          한화시스템/ICT 운영만
+          한화 운영만
         </label>
         <label class="checkbox-inline">
           <input type="checkbox" id="filter-pending" />
-          미완료 항목 있는 도메인만
+          미완료 있는 도메인만
         </label>
       </div>
       <div class="spacer"></div>
